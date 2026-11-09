@@ -1,0 +1,252 @@
+{
+  "name": "Eva_automatización_n8n",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "cliente@ejemplo.com",
+        "subject": "={{ JSON.parse($json.output[0].content[0].text.replace(/```json|```/g, '').trim()).asunto }}",
+        "emailType": "text",
+        "message": "={{ JSON.parse($json.output[0].content[0].text.replace(/```json|```/g, '').trim()).cuerpo }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        -96
+      ],
+      "id": "e25eb3fa-361a-4831-a17d-5d88efaca7e0",
+      "name": "Enviar_correo"
+    },
+    {
+      "parameters": {
+        "formTitle": "Contacto empresa",
+        "formDescription": "Bienvenido, introduce tus datos y te responderemos con la fecha y la hora de la reunión o disponibilidad.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nombre",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Apellidos",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "correo electrónico",
+              "placeholder": "ejemplo@tudominio.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Cual es tu presupuesto?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Entre 3000$ y 10000$"
+                  },
+                  {
+                    "option": "Mas de 10000$"
+                  },
+                  {
+                    "option": "Menos de 3000$"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Que tipo de automatización requieres?",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -320,
+        -96
+      ],
+      "id": "7b97bd69-ee1e-4f31-82dc-3e16a7f766fc",
+      "name": "Formulario"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Debes crear un correo electrónico con intención de agendar una reunión con un cliente cuyos datos hemos recogido a través de un formulario. Proporcioname la salida con concepto o asunto separado del cuerpo. Devuelve exclusivamente un objeto JSON válido, sin explicaciones ni texto adicional.\n\nLos datos de entrada son los siguientes:\n\nNombre: {{ $json.Nombre }}\nApellido: {{ $json.Apellidos }}\nNecesidad: {{ $json['Que tipo de automatización requieres?'] }}\nEjemplo de correo electrónico utilizalo como referencia no lo uses como guia absoluta.\n\n-----------------------------\n\nEjemplo de correo electrónico. El saludo dejalo con mi nombre siempre y el puesto exactamente el mismo\n\nHola 'Nombre',\n\nMe complace enormemente que deposites tu confianza en nuestra empresa. 'Texto personalizado persusasivo con intención de agendar relacionado con la 'necesidad''\n\nPuedes agendar una cita conmigo en el siguiente enlace:\nhttps://cal.com/usuario-ejemplo/30min\n\nSaludos,\n\nEva Moyano, AI & Automation Specialist"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -16,
+        -96
+      ],
+      "id": "fa9c659f-bcd1-477d-b9da-c591537e157e",
+      "name": "Agente_customizador"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        -96
+      ],
+      "id": "2fbf0806-643e-407d-8cd0-5146738583c8",
+      "name": "Wait"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REEMPLAZAR_CON_ID_DE_TU_HOJA",
+          "mode": "list",
+          "cachedResultName": "Nuevos_clientes"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Cliente Nombre": "={{ $('Formulario').item.json.Nombre }}",
+            "Apellido": "={{ $('Formulario').item.json.Apellidos }}",
+            "Contacto": "={{ $('Formulario').item.json['correo electrónico'] }}",
+            "Necesidad": "={{ $('Formulario').item.json['Que tipo de automatización requieres?'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Cliente Nombre",
+              "displayName": "Cliente Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Apellido",
+              "displayName": "Apellido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Contacto",
+              "displayName": "Contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Necesidad",
+              "displayName": "Necesidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        432,
+        -96
+      ],
+      "id": "45684f7f-6144-4fd7-ace5-92bb1e73bfe2",
+      "name": "Nuevos_leads"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Formulario": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente_customizador": {
+      "main": [
+        [
+          {
+            "node": "Enviar_correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Agente_customizador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar_correo": {
+      "main": [
+        [
+          {
+            "node": "Nuevos_leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {},
+  "nodeGroups": [],
+  "tags": []
+}
