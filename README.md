@@ -2,6 +2,10 @@
 
 ## Descripción del proyecto
 
+## Vista general del workflow
+
+![Workflow de automatización de solicitudes de clientes](workflow-automatizacion-clientes.png)
+
 Automatización de la gestión de solicitudes de clientes mediante n8n e inteligencia artificial.
 
 El sistema recibe los datos de una solicitud, utiliza un agente de IA basado en OpenAI para generar una respuesta personalizada por correo electrónico, envía el mensaje automáticamente mediante Gmail e incluye un enlace de Cal.com para que el cliente pueda agendar una reunión. Además, registra los datos del contacto en Google Sheets.
